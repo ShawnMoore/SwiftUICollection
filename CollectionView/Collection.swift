@@ -116,15 +116,43 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
       })
     }
 
-    func makeCoordinator() -> Collection.Coordinator {
+    func makeCoordinator() -> Collection.Coordinator<Content> {
         return Coordinator()
     }
     
     func makeUIView(context: Context) -> UICollectionView {
         let view = UICollectionView(frame: .zero, collectionViewLayout: Collection.makeLayout())
-        view.register(TextCell.self, forCellWithReuseIdentifier: TextCell.reuseIdentifier)
-        
-        context.coordinator.dataSource = Collection.configureDataSource(for: view)
+        view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+
+        let dataSource = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>(collectionView: view) {
+          (collectionView: UICollectionView,
+          indexPath: IndexPath,
+          hostingController: UIHostingController<Content>) -> UICollectionViewCell? in
+
+          // Get a cell of the desired kind.
+          let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell",for: indexPath)
+
+          // Populate the cell with our item description.
+          hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+          hostingController.view.frame = cell.frame
+          cell.addSubview(hostingController.view)
+
+          hostingController.view.leadingAnchor.constraint(equalTo: cell.leadingAnchor).isActive = true
+          hostingController.view.topAnchor.constraint(equalTo: cell.topAnchor).isActive = true
+          hostingController.view.trailingAnchor.constraint(equalTo: cell.trailingAnchor).isActive = true
+          hostingController.view.bottomAnchor.constraint(equalTo: cell.bottomAnchor).isActive = true
+
+          // Return the cell.
+          return cell
+        }
+
+        // initial data
+        let snapshot = NSDiffableDataSourceSnapshot<Section, UIHostingController<Content>>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(viewControllers)
+        dataSource.apply(snapshot, animatingDifferences: false)
+
+        context.coordinator.dataSource = dataSource
         
         return view
     }
@@ -191,8 +219,8 @@ extension Collection {
 
 // MARK: - Coordinator
 extension Collection {
-    class Coordinator {
-        typealias DataSourceType = UICollectionViewDiffableDataSource<Section, Int>
+    class Coordinator<Content: View> {
+        typealias DataSourceType = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>
         
         var dataSource: DataSourceType?
         
