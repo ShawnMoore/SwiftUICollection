@@ -9,18 +9,111 @@
 import SwiftUI
 
 struct Collection<Content> : UIViewRepresentable where Content : View {
-    let content: Content?
+    var viewControllers: [UIHostingController<Content>]
 
     init() {
-      self.content = nil
+      self.viewControllers = []
+      
     }
 
     init(@ViewBuilder content: () -> Content) {
-      self.content = content()
+      self.viewControllers = [UIHostingController(rootView: content())]
     }
 
-    init<Data, ItemContent>(_ data: Data, itemContent: @escaping (Data.Element.IdentifiedValue) -> ItemContent) where Content == ForEach<Data, ItemContent>, Data : RandomAccessCollection, ItemContent : View, Data.Element : Identifiable {
-      self.content = ForEach(data, content: itemContent)
+    init<C0, C1>(@ViewBuilder content: () -> TupleView<(C0, C1)>) where C0 : View, C1 : View, Content == AnyView {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1))]
+    }
+
+    init<C0, C1, C2>(@ViewBuilder content: () -> TupleView<(C0, C1, C2)>) where C0 : View, C1 : View, C2 : View, Content == AnyView {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2))]
+    }
+
+    init<C0, C1, C2, C3>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3)>) where C0 : View, C1 : View, C2 : View, C3 : View, Content == AnyView {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3))]
+    }
+
+    init<C0, C1, C2, C3, C4>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3, C4)>) where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, Content == AnyView {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3)),
+                              UIHostingController(rootView: AnyView(content.value.4))]
+    }
+
+    init<C0, C1, C2, C3, C4, C5>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3, C4, C5)>) where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, Content == AnyView  {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3)),
+                              UIHostingController(rootView: AnyView(content.value.4)),
+                              UIHostingController(rootView: AnyView(content.value.5))]
+    }
+
+    init<C0, C1, C2, C3, C4, C5, C6>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3, C4, C5, C6)>) where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, Content == AnyView  {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3)),
+                              UIHostingController(rootView: AnyView(content.value.4)),
+                              UIHostingController(rootView: AnyView(content.value.5)),
+                              UIHostingController(rootView: AnyView(content.value.6))]
+    }
+
+    init<C0, C1, C2, C3, C4, C5, C6, C7>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3, C4, C5, C6, C7)>) where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, Content == AnyView  {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3)),
+                              UIHostingController(rootView: AnyView(content.value.4)),
+                              UIHostingController(rootView: AnyView(content.value.5)),
+                              UIHostingController(rootView: AnyView(content.value.6)),
+                              UIHostingController(rootView: AnyView(content.value.7))]
+    }
+
+    init<C0, C1, C2, C3, C4, C5, C6, C7, C8>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3, C4, C5, C6, C7, C8)>) where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View, Content == AnyView  {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3)),
+                              UIHostingController(rootView: AnyView(content.value.4)),
+                              UIHostingController(rootView: AnyView(content.value.5)),
+                              UIHostingController(rootView: AnyView(content.value.6)),
+                              UIHostingController(rootView: AnyView(content.value.7)),
+                              UIHostingController(rootView: AnyView(content.value.8))]
+    }
+
+    init<C0, C1, C2, C3, C4, C5, C6, C7, C8, C9>(@ViewBuilder content: () -> TupleView<(C0, C1, C2, C3, C4, C5, C6, C7, C8, C9)>) where C0 : View, C1 : View, C2 : View, C3 : View, C4 : View, C5 : View, C6 : View, C7 : View, C8 : View, C9 : View, Content == AnyView  {
+      let content = content()
+      self.viewControllers = [UIHostingController(rootView: AnyView(content.value.0)),
+                              UIHostingController(rootView: AnyView(content.value.1)),
+                              UIHostingController(rootView: AnyView(content.value.2)),
+                              UIHostingController(rootView: AnyView(content.value.3)),
+                              UIHostingController(rootView: AnyView(content.value.4)),
+                              UIHostingController(rootView: AnyView(content.value.5)),
+                              UIHostingController(rootView: AnyView(content.value.6)),
+                              UIHostingController(rootView: AnyView(content.value.7)),
+                              UIHostingController(rootView: AnyView(content.value.8)),
+                              UIHostingController(rootView: AnyView(content.value.9))]
+    }
+
+    init<Data>(_ data: Data, itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
+      self.viewControllers = data.reduce(into: [], { (result, element) in
+        result.append(UIHostingController(rootView: itemContent(element.identifiedValue)))
+      })
     }
 
     func makeCoordinator() -> Collection.Coordinator {
@@ -117,3 +210,15 @@ struct Collection_Previews : PreviewProvider {
     }
 }
 #endif
+
+//extension UIHostingController {
+//  func build<Data, ItemContent>(from view: ForEach<Data, ItemContent>) -> [UIHostingController<AnyView>]  where Data : RandomAccessCollection, ItemContent : View, Data.Element : Identifiable {
+//    return view.data.reduce(into: []) { (result, element) in
+//      result.append(UIHostingController<AnyView>(rootView: AnyView(view.content(element.identifiedValue))))
+//    }
+//  }
+//
+//  func build<ItemContent>(from view: ItemContent) -> [UIHostingController<AnyView>] {
+//    return [UIHostingController<AnyView>(rootView: AnyView(view)]
+//  }
+//}
