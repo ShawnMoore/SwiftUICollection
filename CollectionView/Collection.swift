@@ -8,30 +8,13 @@
 
 import SwiftUI
 
-class CollectionLayoutInformation: NSObject, UICollectionViewDelegateFlowLayout {
-  let sizes: [CGSize]
-
-  override init() {
-    self.sizes = []
-  }
-
-  init<Content>(items: [UIHostingController<Content>]) where Content : View {
-    self.sizes = items.reduce(into: [], { (result, hostingController) in
-      result.append(hostingController.sizeThatFits(in: UIScreen.main.bounds.size))
-    })
-  }
-
-  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    return sizes[indexPath.item]
-  }
-}
-
 struct Collection<Content> : UIViewRepresentable where Content : View {
     var viewControllers: [UIHostingController<Content>]
 
+    fileprivate var padding: UIEdgeInsets?
+
     init() {
       self.viewControllers = []
-      
     }
 
     init(@ViewBuilder content: () -> Content) {
@@ -142,7 +125,7 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
         let view = UICollectionView(frame: .zero, collectionViewLayout: Collection.makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
-        let delegate = CollectionLayoutInformation.init(items: viewControllers)
+        let delegate = Collection.LayoutInformation(items: viewControllers, padding: padding)
         view.delegate = delegate
 
         let dataSource = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>(collectionView: view) {
@@ -187,20 +170,84 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
 // MARK: - Layout
 fileprivate extension Collection {
     static func makeLayout() -> UICollectionViewLayout {
-        return UICollectionViewFlowLayout()
-        
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.2),
-                                              heightDimension: .fractionalHeight(1.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .fractionalWidth(0.2))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       subitems: [item])
-        
-        return UICollectionViewCompositionalLayout(section: NSCollectionLayoutSection(group: group))
+      let layout = UICollectionViewFlowLayout()
+      layout.minimumInteritemSpacing = 0;
+      layout.minimumLineSpacing = 0;
+
+      return layout
+
+      let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.2),
+                                            heightDimension: .fractionalHeight(1.0))
+      let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+      let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                             heightDimension: .fractionalWidth(0.2))
+      let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                     subitems: [item])
+
+      return UICollectionViewCompositionalLayout(section: NSCollectionLayoutSection(group: group))
     }
 }
+
+extension Collection {
+  class LayoutInformation: NSObject, UICollectionViewDelegateFlowLayout {
+    let sizes: [CGSize]
+    let padding: UIEdgeInsets
+
+    override init() {
+      self.sizes = []
+      self.padding = .zero
+    }
+
+    init<Content>(items: [UIHostingController<Content>], padding: UIEdgeInsets? = nil) where Content : View {
+      self.sizes = items.reduce(into: [], { (result, hostingController) in
+        result.append(hostingController.sizeThatFits(in: UIScreen.main.bounds.size))
+      })
+      self.padding = padding ?? .zero
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+      return sizes[indexPath.item]
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+      return padding
+    }
+  }
+}
+
+//// MARK: - Padding
+//extension Collection {
+//  mutating func padding(_ length: Length) -> Collection<Content> {
+//    self.padding = UIEdgeInsets(top: length, left: length, bottom: length, right: length)
+//    return self
+//  }
+//
+//  mutating func padding(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Content> {
+//    let systemPadding: Length = 4
+//    let padding = length ?? systemPadding
+//    var insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+//
+//    if edges == .top || edges == .all || edges == .vertical {
+//      insets.top = padding
+//    }
+//
+//    if edges == .bottom || edges == .all || edges == .vertical {
+//      insets.bottom = padding
+//    }
+//
+//    if edges == .leading || edges == .all || edges == .horizontal {
+//      insets.left = padding
+//    }
+//
+//    if edges == .trailing || edges == .all || edges == .horizontal {
+//      insets.right = padding
+//    }
+//
+//    self.padding = insets
+//    return self
+//  }
+//}
 
 // MARK: - Data Source
 extension Collection {
@@ -245,9 +292,9 @@ extension Collection {
         typealias DataSourceType = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>
         
         var dataSource: DataSourceType?
-        var delegate: CollectionLayoutInformation?
+        var delegate: Collection.LayoutInformation?
         
-        init(dataSource: DataSourceType? = nil, delegate: CollectionLayoutInformation? = nil) {
+        init(dataSource: DataSourceType? = nil, delegate: Collection.LayoutInformation? = nil) {
             self.dataSource = dataSource
             self.delegate = delegate
         }
