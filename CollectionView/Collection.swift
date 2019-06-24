@@ -8,6 +8,24 @@
 
 import SwiftUI
 
+class CollectionLayoutInformation: NSObject, UICollectionViewDelegateFlowLayout {
+  let sizes: [CGSize]
+
+  override init() {
+    self.sizes = []
+  }
+
+  init<Content>(items: [UIHostingController<Content>]) where Content : View {
+    self.sizes = items.reduce(into: [], { (result, hostingController) in
+      result.append(hostingController.sizeThatFits(in: UIScreen.main.bounds.size))
+    })
+  }
+
+  func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    return sizes[indexPath.item]
+  }
+}
+
 struct Collection<Content> : UIViewRepresentable where Content : View {
     var viewControllers: [UIHostingController<Content>]
 
@@ -124,6 +142,9 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
         let view = UICollectionView(frame: .zero, collectionViewLayout: Collection.makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
+        let delegate = CollectionLayoutInformation.init(items: viewControllers)
+        view.delegate = delegate
+
         let dataSource = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>(collectionView: view) {
           (collectionView: UICollectionView,
           indexPath: IndexPath,
@@ -153,6 +174,7 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
         dataSource.apply(snapshot, animatingDifferences: false)
 
         context.coordinator.dataSource = dataSource
+        context.coordinator.delegate = delegate
         
         return view
     }
@@ -223,9 +245,11 @@ extension Collection {
         typealias DataSourceType = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>
         
         var dataSource: DataSourceType?
+        var delegate: CollectionLayoutInformation?
         
-        init(_ dataSource: DataSourceType? = nil) {
+        init(dataSource: DataSourceType? = nil, delegate: CollectionLayoutInformation? = nil) {
             self.dataSource = dataSource
+            self.delegate = delegate
         }
     }
 }
