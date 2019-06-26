@@ -9,9 +9,13 @@
 import SwiftUI
 
 struct Collection<Content> : UIViewRepresentable where Content : View {
-    var viewControllers: [UIHostingController<Content>]
+    fileprivate var viewControllers: [UIHostingController<Content>]
+    fileprivate var insets: UIEdgeInsets?
 
-    fileprivate var padding: UIEdgeInsets?
+  fileprivate init(_ collection: Collection<Content>, viewControllers: [UIHostingController<Content>] = [], insets: UIEdgeInsets? = nil) {
+      self.viewControllers = collection.viewControllers ?? viewControllers
+      self.insets = collection.insets ?? insets
+    }
 
     init() {
       self.viewControllers = []
@@ -37,7 +41,7 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
         let view = UICollectionView(frame: .zero, collectionViewLayout: Collection.makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
-        let delegate = Collection.LayoutInformation(items: viewControllers, padding: padding)
+        let delegate = Collection.LayoutInformation(items: viewControllers, insets: insets)
         view.delegate = delegate
 
         let dataSource = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>(collectionView: view) {
@@ -104,18 +108,18 @@ fileprivate extension Collection {
 extension Collection {
   class LayoutInformation: NSObject, UICollectionViewDelegateFlowLayout {
     let sizes: [CGSize]
-    let padding: UIEdgeInsets
+    let insets: UIEdgeInsets
 
     override init() {
       self.sizes = []
-      self.padding = .zero
+      self.insets = .zero
     }
 
-    init<Content>(items: [UIHostingController<Content>], padding: UIEdgeInsets? = nil) where Content : View {
+    init<Content>(items: [UIHostingController<Content>], insets: UIEdgeInsets? = nil) where Content : View {
       self.sizes = items.reduce(into: [], { (result, hostingController) in
         result.append(hostingController.sizeThatFits(in: UIScreen.main.bounds.size))
       })
-      self.padding = padding ?? .zero
+      self.insets = insets ?? .zero
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -123,43 +127,41 @@ extension Collection {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-      return padding
+      return insets
     }
   }
 }
 
-//// MARK: - Padding
-//extension Collection {
-//  mutating func padding(_ length: Length) -> Collection<Content> {
-//    self.padding = UIEdgeInsets(top: length, left: length, bottom: length, right: length)
-//    return self
-//  }
-//
-//  mutating func padding(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Content> {
-//    let systemPadding: Length = 4
-//    let padding = length ?? systemPadding
-//    var insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-//
-//    if edges == .top || edges == .all || edges == .vertical {
-//      insets.top = padding
-//    }
-//
-//    if edges == .bottom || edges == .all || edges == .vertical {
-//      insets.bottom = padding
-//    }
-//
-//    if edges == .leading || edges == .all || edges == .horizontal {
-//      insets.left = padding
-//    }
-//
-//    if edges == .trailing || edges == .all || edges == .horizontal {
-//      insets.right = padding
-//    }
-//
-//    self.padding = insets
-//    return self
-//  }
-//}
+// MARK: - insets
+extension Collection {
+  func insets(_ length: Length) -> Collection<Content> {
+    return Collection(self, insets: UIEdgeInsets(top: length, left: length, bottom: length, right: length))
+  }
+
+  func insets(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Content> {
+    let systeminsets: Length = 4
+    let insetsValue = length ?? systeminsets
+    var insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+
+    if edges == .top || edges == .all || edges == .vertical {
+      insets.top = insetsValue
+    }
+
+    if edges == .bottom || edges == .all || edges == .vertical {
+      insets.bottom = insetsValue
+    }
+
+    if edges == .leading || edges == .all || edges == .horizontal {
+      insets.left = insetsValue
+    }
+
+    if edges == .trailing || edges == .all || edges == .horizontal {
+      insets.right = insetsValue
+    }
+
+    return Collection(self, insets: insets)
+  }
+}
 
 // MARK: - Data Source
 extension Collection {
@@ -221,15 +223,3 @@ struct Collection_Previews : PreviewProvider {
     }
 }
 #endif
-
-//extension UIHostingController {
-//  func build<Data, ItemContent>(from view: ForEach<Data, ItemContent>) -> [UIHostingController<AnyView>]  where Data : RandomAccessCollection, ItemContent : View, Data.Element : Identifiable {
-//    return view.data.reduce(into: []) { (result, element) in
-//      result.append(UIHostingController<AnyView>(rootView: AnyView(view.content(element.identifiedValue))))
-//    }
-//  }
-//
-//  func build<ItemContent>(from view: ItemContent) -> [UIHostingController<AnyView>] {
-//    return [UIHostingController<AnyView>(rootView: AnyView(view)]
-//  }
-//}

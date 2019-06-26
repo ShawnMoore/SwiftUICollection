@@ -34,7 +34,7 @@ struct ContentView : View {
         ForEach(hatedRestaurants) { (restaurant) -> Text in
           Text(restaurant.name)
         }
-      }
+      }.insets(5)
     }
 }
 
