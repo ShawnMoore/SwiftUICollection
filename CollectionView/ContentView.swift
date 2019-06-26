@@ -28,14 +28,12 @@ struct ContentView : View {
 
     var body: some View {
       Collection {
-        CollectionCellBuilder.buildBlock(
-          ForEach(favoriteRestaurants) { (restaurant) -> Text in
-            Text(restaurant.name)
-          },
-          ForEach(hatedRestaurants) { (restaurant) -> Text in
-            Text(restaurant.name)
-          }
-        )
+        ForEach(favoriteRestaurants) { (restaurant) -> Text in
+          Text(restaurant.name)
+        }
+        ForEach(hatedRestaurants) { (restaurant) -> Text in
+          Text(restaurant.name)
+        }
       }
     }
 }
