@@ -187,36 +187,6 @@ extension Collection {
     enum Section {
         case main
     }
-    
-    fileprivate static func configureDataSource(for view: UICollectionView) -> UICollectionViewDiffableDataSource<Section, Int> {
-        let dataSource = UICollectionViewDiffableDataSource<Section, Int>(collectionView: view) {
-            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Int) -> UICollectionViewCell? in
-            
-            // Get a cell of the desired kind.
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: TextCell.reuseIdentifier,
-                for: indexPath) as? TextCell else { fatalError("Could not create new cell") }
-            
-            // Populate the cell with our item description.
-            cell.label.text = "\(identifier)"
-            cell.contentView.backgroundColor = .red
-            cell.layer.borderColor = UIColor.black.cgColor
-            cell.layer.borderWidth = 1
-            cell.label.textAlignment = .center
-            cell.label.font = UIFont.preferredFont(forTextStyle: .title1)
-            
-            // Return the cell.
-            return cell
-        }
-        
-        // initial data
-        let snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(Array(0..<94))
-        dataSource.apply(snapshot, animatingDifferences: false)
-        
-        return dataSource
-    }
 }
 
 // MARK: - Coordinator
