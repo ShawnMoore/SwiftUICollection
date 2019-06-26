@@ -11,10 +11,18 @@ import SwiftUI
 struct Collection<Content> : UIViewRepresentable where Content : View {
     fileprivate var viewControllers: [UIHostingController<Content>]
     fileprivate var insets: UIEdgeInsets?
+    fileprivate var spacing: Length?
+    fileprivate var rowSpacing: Length?
 
-  fileprivate init(_ collection: Collection<Content>, viewControllers: [UIHostingController<Content>] = [], insets: UIEdgeInsets? = nil) {
+    fileprivate init(_ collection: Collection<Content>,
+                   viewControllers: [UIHostingController<Content>] = [],
+                   insets: UIEdgeInsets? = nil,
+                   spacing: Length? = nil,
+                   rowSpacing: Length? = nil) {
       self.viewControllers = collection.viewControllers ?? viewControllers
       self.insets = collection.insets ?? insets
+      self.spacing = collection.spacing ?? spacing
+      self.rowSpacing = collection.rowSpacing ?? rowSpacing
     }
 
     init() {
@@ -38,7 +46,7 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
     }
     
     func makeUIView(context: Context) -> UICollectionView {
-        let view = UICollectionView(frame: .zero, collectionViewLayout: Collection.makeLayout())
+        let view = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
         let delegate = Collection.LayoutInformation(items: viewControllers, insets: insets)
@@ -85,10 +93,10 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
 
 // MARK: - Layout
 fileprivate extension Collection {
-    static func makeLayout() -> UICollectionViewLayout {
+    func makeLayout() -> UICollectionViewLayout {
       let layout = UICollectionViewFlowLayout()
-      layout.minimumInteritemSpacing = 0;
-      layout.minimumLineSpacing = 0;
+      layout.minimumInteritemSpacing = self.spacing ?? 0;
+      layout.minimumLineSpacing = self.rowSpacing ?? 0;
 
       return layout
 
@@ -160,6 +168,17 @@ extension Collection {
     }
 
     return Collection(self, insets: insets)
+  }
+}
+
+// MARK: - Spacing
+extension Collection {
+  func spacing(_ length: Length? = nil) -> Collection<Content> {
+    return Collection(self, spacing: length ?? 4)
+  }
+
+  func rowSpacing(_ length: Length? = nil) -> Collection<Content> {
+    return Collection(self, rowSpacing: length ?? 4)
   }
 }
 

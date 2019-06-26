@@ -35,6 +35,8 @@ struct ContentView : View {
           Text(restaurant.name)
         }
       }.insets(5)
+       .spacing()
+       .rowSpacing(20)
     }
 }
 
