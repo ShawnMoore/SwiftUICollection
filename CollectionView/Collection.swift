@@ -19,7 +19,7 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
                    insets: UIEdgeInsets? = nil,
                    spacing: Length? = nil,
                    rowSpacing: Length? = nil) {
-      self.viewControllers = collection.viewControllers ?? viewControllers
+      self.viewControllers = collection.viewControllers
       self.insets = collection.insets ?? insets
       self.spacing = collection.spacing ?? spacing
       self.rowSpacing = collection.rowSpacing ?? rowSpacing
