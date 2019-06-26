@@ -15,6 +15,7 @@
 		58132B8B22BE019700521741 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 58132B8922BE019700521741 /* LaunchScreen.storyboard */; };
 		58132B9322BE022500521741 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58132B9222BE022500521741 /* Collection.swift */; };
 		58132B9522BE05E600521741 /* TextCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58132B9422BE05E600521741 /* TextCell.swift */; };
+		DD7C74DB22C17CDC00F666FF /* CollectionCellBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7C74DA22C17CDC00F666FF /* CollectionCellBuilder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		58132B8C22BE019700521741 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		58132B9222BE022500521741 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		58132B9422BE05E600521741 /* TextCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextCell.swift; sourceTree = "<group>"; };
+		DD7C74DA22C17CDC00F666FF /* CollectionCellBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionCellBuilder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				58132B8022BE019600521741 /* SceneDelegate.swift */,
 				58132B8222BE019600521741 /* ContentView.swift */,
 				58132B9222BE022500521741 /* Collection.swift */,
+				DD7C74DA22C17CDC00F666FF /* CollectionCellBuilder.swift */,
 				58132B9422BE05E600521741 /* TextCell.swift */,
 				58132B8422BE019700521741 /* Assets.xcassets */,
 				58132B8922BE019700521741 /* LaunchScreen.storyboard */,
@@ -156,6 +159,7 @@
 				58132B7F22BE019600521741 /* AppDelegate.swift in Sources */,
 				58132B8122BE019600521741 /* SceneDelegate.swift in Sources */,
 				58132B8322BE019600521741 /* ContentView.swift in Sources */,
+				DD7C74DB22C17CDC00F666FF /* CollectionCellBuilder.swift in Sources */,
 				58132B9322BE022500521741 /* Collection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -14,14 +14,27 @@ struct Restaurant: Identifiable {
 }
 
 struct ContentView : View {
-    var body: some View {
-      let first = Restaurant(name: "Joe's Original")
-      let second = Restaurant(name: "The Real Joe's Original")
-      let third = Restaurant(name: "Original Joe's")
-      let restaurants = [first, second, third]
+    let favoriteRestaurants = [
+      Restaurant(name: "Joe's Original"),
+      Restaurant(name: "The Real Joe's Original"),
+      Restaurant(name: "Original Joe's")
+    ]
 
-      return Collection(restaurants) { restaurant in
-        Text("\(restaurant.name)")
+    let hatedRestaurants = [
+      Restaurant(name: "Bob's Original"),
+      Restaurant(name: "The Real Bob's Original"),
+      Restaurant(name: "Original Bob's")
+    ]
+
+    var body: some View {
+      Collection {
+        CollectionCellBuilder.buildBlock(
+          Section(header: Text("Favorite Restaurants")) {
+            Text("Hello World")
+          },
+          Section(header: Text("Favorite Restaurants")) {
+            Text("Hello World")
+          })
       }
     }
 }
