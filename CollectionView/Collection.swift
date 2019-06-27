@@ -29,16 +29,21 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
       self.viewControllers = []
     }
 
-    init(@CollectionCellBuilder content: () -> [Content]) {
-      self.viewControllers = content().reduce(into: [], { (result, view) in
-        result.append(UIHostingController(rootView: view))
-      })
+    init(content: () -> Content) {
+      self.viewControllers = [UIHostingController(rootView: content())]
+    }
+
+    init<Data>(_ forEach: () -> ForEach<Data, Content>) {
+      let forEach = forEach()
+      self.viewControllers = forEach.data.map { UIHostingController(rootView:forEach.content($0.identifiedValue)) }
+    }
+
+    init(@CollectionBuilder content: () -> [Content]) {
+      self.viewControllers = content().map({ UIHostingController(rootView: $0) })
     }
 
     init<Data>(_ data: Data, itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
-      self.viewControllers = data.reduce(into: [], { (result, element) in
-        result.append(UIHostingController(rootView: itemContent(element.identifiedValue)))
-      })
+      self.viewControllers = data.map { UIHostingController(rootView: itemContent($0.identifiedValue)) }
     }
 
     func makeCoordinator() -> Collection.Coordinator<Content> {
@@ -76,8 +81,10 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
 
         // initial data
         let snapshot = NSDiffableDataSourceSnapshot<Section, UIHostingController<Content>>()
+
         snapshot.appendSections([.main])
-        snapshot.appendItems(viewControllers)
+        snapshot.appendItems(viewControllers, toSection: .main)
+      
         dataSource.apply(snapshot, animatingDifferences: false)
 
         context.coordinator.dataSource = dataSource

@@ -2,8 +2,9 @@
 
 import SwiftUI
 
+// MARK: - Collection
 @_functionBuilder
-struct CollectionCellBuilder {
+struct CollectionBuilder {
   static func buildBlock<Content: View>(_ views: Content...) -> [Content] {
     return views
   }
