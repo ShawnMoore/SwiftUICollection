@@ -8,13 +8,13 @@
 
 import SwiftUI
 
-struct Collection<Content> : UIViewRepresentable where Content : View {
-    fileprivate var views: [CollectionSection<Content>]
+struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : View, Footer : View, Content : View {
+    fileprivate var views: [CollectionSection<Parent, Footer, Content>]
     fileprivate var insets: UIEdgeInsets?
     fileprivate var spacing: Length?
     fileprivate var rowSpacing: Length?
 
-    fileprivate init(views: [CollectionSection<Content>] = [],
+    fileprivate init(views: [CollectionSection<Parent, Footer, Content>] = [],
                      insets: UIEdgeInsets? = nil,
                      spacing: Length? = nil,
                      rowSpacing: Length? = nil) {
@@ -24,10 +24,10 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
       self.rowSpacing = rowSpacing
     }
 
-    fileprivate func modify(views: [CollectionSection<Content>]? = nil,
+    fileprivate func modify(views: [CollectionSection<Parent, Footer, Content>]? = nil,
                             insets: UIEdgeInsets? = nil,
                             spacing: Length? = nil,
-                            rowSpacing: Length? = nil) -> Collection<Content> {
+                            rowSpacing: Length? = nil) -> Collection<Parent, Footer, Content> {
       return Self.init(views: views ?? self.views, insets: insets ?? self.insets, spacing: spacing ?? self.spacing, rowSpacing: rowSpacing ?? self.rowSpacing)
     }
 
@@ -35,12 +35,12 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
       self.views = []
     }
 
-    init(@CollectionBuilder content: () -> [CollectionSection<Content>]) {
+    init(@CollectionBuilder content: () -> [CollectionSection<Parent, Footer, Content>]) {
       self.views = content()
     }
 
-    init<Data>(_ data: Data..., itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
-        self.views = data.map({ CollectionSection(content: $0.map { itemContent($0.identifiedValue) }) })
+    init<Data>(_ information: (header: Parent, footer: Footer, Data)..., itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
+        self.views = information.map({ CollectionSection(header: $0.header, footer: $0.footer, content: $0.2.map { itemContent($0.identifiedValue) }) })
     }
   
     func makeCoordinator() -> Collection.Coordinator<Content> {
@@ -99,6 +99,24 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
     }
 }
 
+extension Collection where Parent == EmptyView {
+  init<Data>(_ information: (footer: Footer, Data)..., itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
+    self.views = information.map({ CollectionSection(header: EmptyView(), footer: $0.footer, content: $0.1.map { itemContent($0.identifiedValue) }) })
+  }
+}
+
+extension Collection where Footer == EmptyView {
+  init<Data>(_ information: (header: Parent, Data)..., itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
+    self.views = information.map({ CollectionSection(header: $0.header, footer: EmptyView(), content: $0.1.map { itemContent($0.identifiedValue) }) })
+  }
+}
+
+extension Collection where Parent == EmptyView, Footer == EmptyView {
+  init<Data>(_ data: Data..., itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
+    self.views = data.map({ CollectionSection(header: EmptyView(), footer: EmptyView(), content: $0.map { itemContent($0.identifiedValue) }) })
+  }
+}
+
 // MARK: - Layout
 fileprivate extension Collection {
     func makeLayout() -> UICollectionViewLayout {
@@ -150,11 +168,11 @@ extension Collection {
 
 // MARK: - insets
 extension Collection {
-  func insets(_ length: Length) -> Collection<Content> {
+  func insets(_ length: Length) -> Collection<Parent, Footer, Content> {
     return self.modify(insets: UIEdgeInsets(top: length, left: length, bottom: length, right: length))
   }
 
-  func insets(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Content> {
+  func insets(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Parent, Footer, Content> {
     let systeminsets: Length = 4
     let insetsValue = length ?? systeminsets
     var insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -181,11 +199,11 @@ extension Collection {
 
 // MARK: - Spacing
 extension Collection {
-  func spacing(_ length: Length? = nil) -> Collection<Content> {
+  func spacing(_ length: Length? = nil) -> Collection<Parent, Footer, Content> {
     return self.modify(spacing: length ?? 4)
   }
 
-  func rowSpacing(_ length: Length? = nil) -> Collection<Content> {
+  func rowSpacing(_ length: Length? = nil) -> Collection<Parent, Footer, Content> {
     return self.modify(rowSpacing: length ?? 4)
   }
 }
@@ -216,7 +234,7 @@ extension Collection {
 #if DEBUG
 struct Collection_Previews : PreviewProvider {
     static var previews: some View {
-        Collection<Text>()
+        Collection<AnyView, AnyView, Text>()
     }
 }
 #endif
