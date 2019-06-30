@@ -5,10 +5,6 @@ import SwiftUI
 struct CollectionGroup<Content> : DynamicViewContent where Content : View {
   var data: [Content]
 
-  var dataViewControllers: [UIHostingController<Content>] {
-    return data.map { UIHostingController(rootView: $0) }
-  }
-
   var body: some View {
     return ViewBuilder.buildBlock(data.element(at: 0),
                                   data.element(at: 1),
