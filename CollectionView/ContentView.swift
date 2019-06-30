@@ -27,7 +27,10 @@ struct ContentView : View {
     ]
 
     var body: some View {
-      Collection(favoriteRestaurants, hatedRestaurants) { Text($0.name) }
+      Collection((header: Text("Favorite"), favoriteRestaurants),
+                 (header: Text("Hated"), hatedRestaurants)) {
+                  Text($0.name)
+        }
           .insets(5)
           .spacing()
           .rowSpacing(20)

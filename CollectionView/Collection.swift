@@ -63,21 +63,8 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
           indexPath: IndexPath,
           hostingController: UIHostingController<Content>) -> UICollectionViewCell? in
 
-          // Get a cell of the desired kind.
-          let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell",for: indexPath)
-
-          // Populate the cell with our item description.
-          hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-          hostingController.view.frame = cell.frame
-          cell.addSubview(hostingController.view)
-
-          hostingController.view.leadingAnchor.constraint(equalTo: cell.leadingAnchor).isActive = true
-          hostingController.view.topAnchor.constraint(equalTo: cell.topAnchor).isActive = true
-          hostingController.view.trailingAnchor.constraint(equalTo: cell.trailingAnchor).isActive = true
-          hostingController.view.bottomAnchor.constraint(equalTo: cell.bottomAnchor).isActive = true
-
           // Return the cell.
-          return cell
+          return collectionView.dequeueReusableCell(withReuseIdentifier: "cell",for: indexPath).embed(hostingController.view)
         }
 
         // initial data

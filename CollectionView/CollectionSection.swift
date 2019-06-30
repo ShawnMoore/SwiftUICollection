@@ -85,16 +85,6 @@ extension CollectionSection where Parent == EmptyView, Footer == EmptyView {
   }
 }
 
-fileprivate extension Array {
-  func element(at index: Index) -> Element? {
-    guard index >= 0, index < endIndex else {
-      return nil
-    }
-
-    return self[index]
-  }
-}
-
 //#if DEBUG
 //struct CollectionSection_Previews : PreviewProvider {
 //    static var previews: some View {
