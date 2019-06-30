@@ -3,16 +3,21 @@
 import SwiftUI
 
 struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Parent : View, Footer : View, Content : View {
+    // MARK: - Properties
+    // MARK: Views
     fileprivate(set) var header: Parent
     fileprivate(set) var footer: Footer
     fileprivate(set) var data: [Content]
+
+    // MARK: Mutable
+    fileprivate var insets: UIEdgeInsets?
 
     var views: CollectionSectionViews<Parent, Footer, Content> {
       return CollectionSectionViews(section: self)
     }
 
     var layout: CollectionSectionLayout<Parent, Footer, Content> {
-      return CollectionSectionLayout(views: self.views)
+      return CollectionSectionLayout(section: self)
     }
 
     var body: some View {
@@ -30,16 +35,19 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
 
   init(header: Parent,
        footer: Footer,
-       data: [Content]) {
+       data: [Content],
+       insets: UIEdgeInsets?) {
     self.header = header
     self.footer = footer
     self.data = data
+    self.insets = insets
   }
 
-  fileprivate func modify(header: Parent?,
-                          footer: Footer?,
-                          data: [Content]?) -> Self {
-    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data)
+  fileprivate func modify(header: Parent? = nil,
+                          footer: Footer? = nil,
+                          data: [Content]? = nil,
+                          insets: UIEdgeInsets? = nil) -> Self {
+    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data, insets: insets ?? self.insets)
   }
 
   init(header: Parent, footer: Footer, @CollectionSectionBuilder content: () -> [Content]) {
@@ -116,16 +124,53 @@ struct CollectionSectionViews<Parent, Footer, Content> where Parent : View, Foot
   }
 }
 
+// MARK: - insets
+extension CollectionSection {
+  func insets(_ length: Length) -> Self {
+    return self.modify(insets: UIEdgeInsets(top: length, left: length, bottom: length, right: length))
+  }
+
+  func insets(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Self {
+    let systeminsets: Length = 4
+    let insetsValue = length ?? systeminsets
+    var insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+
+    if edges == .top || edges == .all || edges == .vertical {
+      insets.top = insetsValue
+    }
+
+    if edges == .bottom || edges == .all || edges == .vertical {
+      insets.bottom = insetsValue
+    }
+
+    if edges == .leading || edges == .all || edges == .horizontal {
+      insets.left = insetsValue
+    }
+
+    if edges == .trailing || edges == .all || edges == .horizontal {
+      insets.right = insetsValue
+    }
+
+    return self.modify(insets: insets)
+  }
+}
+
 // MARK: - Layout
 struct CollectionSectionLayout<Parent, Footer, Content> where Parent : View, Footer : View, Content : View {
   let parentSize: CGSize
   let contentSizes: [CGSize]
   let footerSize: CGSize
 
-  init(views: CollectionSectionViews<Parent, Footer, Content>) {
+  let inset: UIEdgeInsets?
+
+  init(section: CollectionSection<Parent, Footer, Content>) {
+    let views = section.views
+
     self.parentSize = views.parent.sizeThatFits(in: UIScreen.main.bounds.size)
     self.contentSizes = views.content.map({ $0.sizeThatFits(in: UIScreen.main.bounds.size) })
     self.footerSize = views.footer.sizeThatFits(in: UIScreen.main.bounds.size)
+
+    self.inset = section.insets
   }
 }
 

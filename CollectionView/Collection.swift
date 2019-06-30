@@ -145,7 +145,7 @@ extension Collection {
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-      return insets
+      return layouts.element(at: section)?.inset ?? insets
     }
   }
 }
