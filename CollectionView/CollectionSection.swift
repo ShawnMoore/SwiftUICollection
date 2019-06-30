@@ -3,12 +3,16 @@
 import SwiftUI
 
 struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Parent : View, Footer : View, Content : View {
-    var header: Parent
-    var footer: Footer
-    var data: [Content]
+    fileprivate(set) var header: Parent
+    fileprivate(set) var footer: Footer
+    fileprivate(set) var data: [Content]
 
-    var dataViewControllers: [UIHostingController<Content>] {
-      return data.map { UIHostingController(rootView: $0) }
+    var views: CollectionSectionViews<Parent, Footer, Content> {
+      return CollectionSectionViews(section: self)
+    }
+
+    var layout: CollectionSectionLayout<Parent, Footer, Content> {
+      return CollectionSectionLayout(views: self.views)
     }
 
     var body: some View {
@@ -23,6 +27,20 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
                                     data.element(at: 7),
                                     footer)
     }
+
+  init(header: Parent,
+       footer: Footer,
+       data: [Content]) {
+    self.header = header
+    self.footer = footer
+    self.data = data
+  }
+
+  fileprivate func modify(header: Parent?,
+                          footer: Footer?,
+                          data: [Content]?) -> Self {
+    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data)
+  }
 
   init(header: Parent, footer: Footer, @CollectionSectionBuilder content: () -> [Content]) {
     self.header = header
@@ -82,6 +100,32 @@ extension CollectionSection where Parent == EmptyView, Footer == EmptyView {
 
   init<Data>(_ data: Data, itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
     self.init(data, header: EmptyView(), footer: EmptyView(), itemContent: itemContent)
+  }
+}
+
+// MARK: - UIViews
+struct CollectionSectionViews<Parent, Footer, Content> where Parent : View, Footer : View, Content : View {
+  let parent: UIHostingController<Parent>
+  let content: [UIHostingController<Content>]
+  let footer: UIHostingController<Footer>
+
+  init(section: CollectionSection<Parent, Footer, Content>) {
+    self.parent = UIHostingController(rootView: section.header)
+    self.content = section.data.map({ UIHostingController(rootView: $0) })
+    self.footer = UIHostingController(rootView: section.footer)
+  }
+}
+
+// MARK: - Layout
+struct CollectionSectionLayout<Parent, Footer, Content> where Parent : View, Footer : View, Content : View {
+  let parentSize: CGSize
+  let contentSizes: [CGSize]
+  let footerSize: CGSize
+
+  init(views: CollectionSectionViews<Parent, Footer, Content>) {
+    self.parentSize = views.parent.sizeThatFits(in: UIScreen.main.bounds.size)
+    self.contentSizes = views.content.map({ $0.sizeThatFits(in: UIScreen.main.bounds.size) })
+    self.footerSize = views.footer.sizeThatFits(in: UIScreen.main.bounds.size)
   }
 }
 

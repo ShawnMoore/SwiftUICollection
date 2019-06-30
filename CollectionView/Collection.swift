@@ -27,7 +27,7 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
     fileprivate func modify(views: [CollectionSection<Parent, Footer, Content>]? = nil,
                             insets: UIEdgeInsets? = nil,
                             spacing: Length? = nil,
-                            rowSpacing: Length? = nil) -> Collection<Parent, Footer, Content> {
+                            rowSpacing: Length? = nil) -> Self {
       return Self.init(views: views ?? self.views, insets: insets ?? self.insets, spacing: spacing ?? self.spacing, rowSpacing: rowSpacing ?? self.rowSpacing)
     }
 
@@ -43,7 +43,7 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
         self.views = information.map({ CollectionSection(header: $0.header, footer: $0.footer, content: $0.2.map { itemContent($0.identifiedValue) }) })
     }
   
-    func makeCoordinator() -> Collection.Coordinator<Content> {
+    func makeCoordinator() -> Collection.Coordinator<Parent, Footer, Content> {
         return Coordinator()
     }
     
@@ -51,14 +51,10 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
         let view = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
-        let viewControllers: [UIHostingController<Content>] = self.views.reduce(into: []) { (result, section) in
-          result.append(contentsOf: section.dataViewControllers)
-        }
-
-        let delegate = Collection.LayoutInformation(items: viewControllers, insets: insets)
+        let delegate = Collection.Layout(sections: self.views, insets: insets)
         view.delegate = delegate
 
-        let dataSource = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>(collectionView: view) {
+        let dataSource = UICollectionViewDiffableDataSource<Int, UIHostingController<Content>>(collectionView: view) {
           (collectionView: UICollectionView,
           indexPath: IndexPath,
           hostingController: UIHostingController<Content>) -> UICollectionViewCell? in
@@ -68,10 +64,13 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
         }
 
         // initial data
-        let snapshot = NSDiffableDataSourceSnapshot<Section, UIHostingController<Content>>()
+        let snapshot = NSDiffableDataSourceSnapshot<Int, UIHostingController<Content>>()
 
-        snapshot.appendSections([.main])
-        snapshot.appendItems(viewControllers, toSection: .main)
+        snapshot.appendSections(Array(self.views.startIndex..<self.views.endIndex))
+
+        for (index, section) in self.views.enumerated() {
+          snapshot.appendItems(section.views.content, toSection: index)
+        }
       
         dataSource.apply(snapshot, animatingDifferences: false)
 
@@ -127,24 +126,22 @@ fileprivate extension Collection {
 }
 
 extension Collection {
-  class LayoutInformation: NSObject, UICollectionViewDelegateFlowLayout {
-    let sizes: [CGSize]
+  class Layout<Parent, Footer, Content>: NSObject, UICollectionViewDelegateFlowLayout where Parent : View, Footer : View, Content : View {
+    let layouts: [CollectionSectionLayout<Parent, Footer, Content>]
     let insets: UIEdgeInsets
 
     override init() {
-      self.sizes = []
+      self.layouts = []
       self.insets = .zero
     }
 
-    init<Content>(items: [UIHostingController<Content>], insets: UIEdgeInsets? = nil) where Content : View {
-      self.sizes = items.reduce(into: [], { (result, hostingController) in
-        result.append(hostingController.sizeThatFits(in: UIScreen.main.bounds.size))
-      })
+    init(sections: [CollectionSection<Parent, Footer, Content>], insets: UIEdgeInsets? = nil) {
+      self.layouts = sections.map({ $0.layout })
       self.insets = insets ?? .zero
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-      return sizes[indexPath.item]
+      return layouts[indexPath.section].contentSizes[indexPath.item]
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
@@ -195,22 +192,15 @@ extension Collection {
   }
 }
 
-// MARK: - Data Source
-extension Collection {
-    enum Section {
-        case main
-    }
-}
-
 // MARK: - Coordinator
 extension Collection {
-    class Coordinator<Content: View> {
-        typealias DataSourceType = UICollectionViewDiffableDataSource<Section, UIHostingController<Content>>
+    class Coordinator<Parent: View, Footer: View, Content: View> {
+        typealias DataSourceType = UICollectionViewDiffableDataSource<Int, UIHostingController<Content>>
         
         var dataSource: DataSourceType?
-        var delegate: Collection.LayoutInformation?
+        var delegate: Collection.Layout<Parent, Footer, Content>?
         
-        init(dataSource: DataSourceType? = nil, delegate: Collection.LayoutInformation? = nil) {
+        init(dataSource: DataSourceType? = nil, delegate: Collection.Layout<Parent, Footer, Content>? = nil) {
             self.dataSource = dataSource
             self.delegate = delegate
         }
