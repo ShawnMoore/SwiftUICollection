@@ -48,7 +48,7 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
     }
     
     func makeUIView(context: Context) -> UICollectionView {
-        let view = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: makeLayout())
+        let view = SizeableCollectionView(frame: .zero, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
         let delegate = Collection.Layout(sections: self.views, insets: insets)
@@ -112,7 +112,7 @@ fileprivate extension Collection {
 //
 //      return layout
 
-      let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.2),
+      let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                             heightDimension: .fractionalHeight(1.0))
       let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
