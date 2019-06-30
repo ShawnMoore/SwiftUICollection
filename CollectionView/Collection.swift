@@ -48,7 +48,7 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
     }
     
     func makeUIView(context: Context) -> UICollectionView {
-        let view = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
+        let view = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
         let delegate = Collection.Layout(sections: self.views, insets: insets)
@@ -106,11 +106,11 @@ extension Collection where Parent == EmptyView, Footer == EmptyView {
 // MARK: - Layout
 fileprivate extension Collection {
     func makeLayout() -> UICollectionViewLayout {
-      let layout = UICollectionViewFlowLayout()
-      layout.minimumInteritemSpacing = self.spacing ?? 0;
-      layout.minimumLineSpacing = self.rowSpacing ?? 0;
-
-      return layout
+//      let layout = UICollectionViewFlowLayout()
+//      layout.minimumInteritemSpacing = self.spacing ?? 0;
+//      layout.minimumLineSpacing = self.rowSpacing ?? 0;
+//
+//      return layout
 
       let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.2),
                                             heightDimension: .fractionalHeight(1.0))
