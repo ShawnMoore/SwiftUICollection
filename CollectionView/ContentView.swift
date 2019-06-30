@@ -27,16 +27,10 @@ struct ContentView : View {
     ]
 
     var body: some View {
-      Collection {
-        ForEach(favoriteRestaurants) { (restaurant) -> Text in
-          Text(restaurant.name)
-        }
-        ForEach(hatedRestaurants) { (restaurant) -> Text in
-          Text(restaurant.name)
-        }
-      }.insets(5)
-       .spacing()
-       .rowSpacing(20)
+      Collection(favoriteRestaurants, hatedRestaurants) { Text($0.name) }
+          .insets(5)
+          .spacing()
+          .rowSpacing(20)
     }
 }
 

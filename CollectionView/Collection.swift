@@ -9,43 +9,40 @@
 import SwiftUI
 
 struct Collection<Content> : UIViewRepresentable where Content : View {
-    fileprivate var viewControllers: [UIHostingController<Content>]
+    fileprivate var views: [CollectionSection<Content>]
     fileprivate var insets: UIEdgeInsets?
     fileprivate var spacing: Length?
     fileprivate var rowSpacing: Length?
 
-    fileprivate init(_ collection: Collection<Content>,
-                   viewControllers: [UIHostingController<Content>] = [],
-                   insets: UIEdgeInsets? = nil,
-                   spacing: Length? = nil,
-                   rowSpacing: Length? = nil) {
-      self.viewControllers = collection.viewControllers
-      self.insets = collection.insets ?? insets
-      self.spacing = collection.spacing ?? spacing
-      self.rowSpacing = collection.rowSpacing ?? rowSpacing
+    fileprivate init(views: [CollectionSection<Content>] = [],
+                     insets: UIEdgeInsets? = nil,
+                     spacing: Length? = nil,
+                     rowSpacing: Length? = nil) {
+      self.views = views
+      self.insets = insets
+      self.spacing = spacing
+      self.rowSpacing = rowSpacing
+    }
+
+    fileprivate func modify(views: [CollectionSection<Content>]? = nil,
+                            insets: UIEdgeInsets? = nil,
+                            spacing: Length? = nil,
+                            rowSpacing: Length? = nil) -> Collection<Content> {
+      return Self.init(views: views ?? self.views, insets: insets ?? self.insets, spacing: spacing ?? self.spacing, rowSpacing: rowSpacing ?? self.rowSpacing)
     }
 
     init() {
-      self.viewControllers = []
+      self.views = []
     }
 
-    init(content: () -> Content) {
-      self.viewControllers = [UIHostingController(rootView: content())]
+    init(@CollectionBuilder content: () -> [CollectionSection<Content>]) {
+      self.views = content()
     }
 
-    init<Data>(_ forEach: () -> ForEach<Data, Content>) {
-      let forEach = forEach()
-      self.viewControllers = forEach.data.map { UIHostingController(rootView:forEach.content($0.identifiedValue)) }
+    init<Data>(_ data: Data..., itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
+        self.views = data.map({ CollectionSection(content: $0.map { itemContent($0.identifiedValue) }) })
     }
-
-    init(@CollectionBuilder content: () -> [Content]) {
-      self.viewControllers = content().map({ UIHostingController(rootView: $0) })
-    }
-
-    init<Data>(_ data: Data, itemContent: @escaping (Data.Element.IdentifiedValue) -> Content) where Data : RandomAccessCollection, Content: View, Data.Element : Identifiable {
-      self.viewControllers = data.map { UIHostingController(rootView: itemContent($0.identifiedValue)) }
-    }
-
+  
     func makeCoordinator() -> Collection.Coordinator<Content> {
         return Coordinator()
     }
@@ -53,6 +50,10 @@ struct Collection<Content> : UIViewRepresentable where Content : View {
     func makeUIView(context: Context) -> UICollectionView {
         let view = UICollectionView(frame: .zero, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+
+        let viewControllers: [UIHostingController<Content>] = self.views.reduce(into: []) { (result, section) in
+          result.append(contentsOf: section.dataViewControllers)
+        }
 
         let delegate = Collection.LayoutInformation(items: viewControllers, insets: insets)
         view.delegate = delegate
@@ -150,7 +151,7 @@ extension Collection {
 // MARK: - insets
 extension Collection {
   func insets(_ length: Length) -> Collection<Content> {
-    return Collection(self, insets: UIEdgeInsets(top: length, left: length, bottom: length, right: length))
+    return self.modify(insets: UIEdgeInsets(top: length, left: length, bottom: length, right: length))
   }
 
   func insets(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Content> {
@@ -174,18 +175,18 @@ extension Collection {
       insets.right = insetsValue
     }
 
-    return Collection(self, insets: insets)
+    return self.modify(insets: insets)
   }
 }
 
 // MARK: - Spacing
 extension Collection {
   func spacing(_ length: Length? = nil) -> Collection<Content> {
-    return Collection(self, spacing: length ?? 4)
+    return self.modify(spacing: length ?? 4)
   }
 
   func rowSpacing(_ length: Length? = nil) -> Collection<Content> {
-    return Collection(self, rowSpacing: length ?? 4)
+    return self.modify(rowSpacing: length ?? 4)
   }
 }
 
