@@ -70,6 +70,10 @@ struct CollectionBuilder {
     return [CollectionSection(content: views)]
   }
 
+  static func buildBlock<Content>(_ views: CollectionGroup<Content>...) -> [CollectionSection<EmptyView, EmptyView, CollectionGroup<Content>>] {
+    return [CollectionSection(content: views)]
+  }
+
   static func buildBlock<Parent, Content, Footer>(_ views: Section<Parent, Content, Footer>...) -> [CollectionSection<EmptyView, EmptyView, Section<Parent, Content, Footer>>] {
     return [CollectionSection(content: views)]
   }
@@ -164,6 +168,10 @@ struct CollectionSectionBuilder {
     return views
   }
 
+  static func buildBlock<Content>(_ views: CollectionGroup<Content>...) -> [CollectionGroup<Content>] {
+    return views
+  }
+
   static func buildBlock<Data, Content>(_ views: ForEach<Data, Content>...) -> [Content] {
     return views.reduce(into: [Content]()) { (result, forEach) in
       let views = forEach.data.map({ forEach.content($0.identifiedValue) })
@@ -173,6 +181,14 @@ struct CollectionSectionBuilder {
   }
 
   static func buildBlock(_ views: AnyView...) -> [AnyView] {
+    return views
+  }
+}
+
+// MARK: - CollectionGroupBuilder
+@_functionBuilder
+struct CollectionGroupBuilder {
+  static func buildBlock<Content>(_ views: Content...) -> [Content] {
     return views
   }
 }
