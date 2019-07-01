@@ -43,16 +43,13 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
         self.views = information.map({ CollectionSection(header: $0.header, footer: $0.footer, content: $0.2.map { itemContent($0.identifiedValue) }) })
     }
   
-    func makeCoordinator() -> Collection.Coordinator<Parent, Footer, Content> {
+    func makeCoordinator() -> Collection.Coordinator<Content> {
         return Coordinator()
     }
     
     func makeUIView(context: Context) -> UICollectionView {
         let view = SizeableCollectionView(frame: .zero, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-
-        let delegate = Collection.Layout(sections: self.views, insets: insets)
-        view.delegate = delegate
 
         let dataSource = UICollectionViewDiffableDataSource<Int, UIHostingController<Content>>(collectionView: view) {
           (collectionView: UICollectionView,
@@ -75,7 +72,6 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
         dataSource.apply(snapshot, animatingDifferences: false)
 
         context.coordinator.dataSource = dataSource
-        context.coordinator.delegate = delegate
         
         return view
     }
@@ -106,48 +102,10 @@ extension Collection where Parent == EmptyView, Footer == EmptyView {
 // MARK: - Layout
 fileprivate extension Collection {
     func makeLayout() -> UICollectionViewLayout {
-//      let layout = UICollectionViewFlowLayout()
-//      layout.minimumInteritemSpacing = self.spacing ?? 0;
-//      layout.minimumLineSpacing = self.rowSpacing ?? 0;
-//
-//      return layout
-
-      let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                            heightDimension: .fractionalHeight(1.0))
-      let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
-      let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                             heightDimension: .fractionalWidth(0.2))
-      let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                     subitems: [item])
-
-      return UICollectionViewCompositionalLayout(section: NSCollectionLayoutSection(group: group))
+      return UICollectionViewCompositionalLayout { (section, environment) -> NSCollectionLayoutSection? in
+        return self.views[section].sectionLayout
+      }
     }
-}
-
-extension Collection {
-  class Layout<Parent, Footer, Content>: NSObject, UICollectionViewDelegateFlowLayout where Parent : View, Footer : View, Content : View {
-    let layouts: [CollectionSectionLayout<Parent, Footer, Content>]
-    let insets: UIEdgeInsets
-
-    override init() {
-      self.layouts = []
-      self.insets = .zero
-    }
-
-    init(sections: [CollectionSection<Parent, Footer, Content>], insets: UIEdgeInsets? = nil) {
-      self.layouts = sections.map({ $0.layout })
-      self.insets = insets ?? .zero
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-      return layouts[indexPath.section].contentSizes[indexPath.item]
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-      return layouts.element(at: section)?.inset ?? insets
-    }
-  }
 }
 
 // MARK: - insets
@@ -194,15 +152,13 @@ extension Collection {
 
 // MARK: - Coordinator
 extension Collection {
-    class Coordinator<Parent: View, Footer: View, Content: View> {
+    class Coordinator<Content: View> {
         typealias DataSourceType = UICollectionViewDiffableDataSource<Int, UIHostingController<Content>>
         
         var dataSource: DataSourceType?
-        var delegate: Collection.Layout<Parent, Footer, Content>?
         
-        init(dataSource: DataSourceType? = nil, delegate: Collection.Layout<Parent, Footer, Content>? = nil) {
+        init(dataSource: DataSourceType? = nil) {
             self.dataSource = dataSource
-            self.delegate = delegate
         }
     }
 }

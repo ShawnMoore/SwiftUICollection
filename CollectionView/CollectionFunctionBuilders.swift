@@ -70,10 +70,6 @@ struct CollectionBuilder {
     return [CollectionSection(content: views)]
   }
 
-  static func buildBlock<Content>(_ views: CollectionGroup<Content>...) -> [CollectionSection<EmptyView, EmptyView, CollectionGroup<Content>>] {
-    return [CollectionSection(content: views)]
-  }
-
   static func buildBlock<Parent, Content, Footer>(_ views: Section<Parent, Content, Footer>...) -> [CollectionSection<EmptyView, EmptyView, Section<Parent, Content, Footer>>] {
     return [CollectionSection(content: views)]
   }
@@ -165,10 +161,6 @@ struct CollectionSectionBuilder {
   }
 
   static func buildBlock<Parent, Content, Footer>(_ views: Section<Parent, Content, Footer>...) -> [Section<Parent, Content, Footer>] {
-    return views
-  }
-
-  static func buildBlock<Content>(_ views: CollectionGroup<Content>...) -> [CollectionGroup<Content>] {
     return views
   }
 

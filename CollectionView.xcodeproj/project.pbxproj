@@ -19,7 +19,6 @@
 		DD7C74E122C407B100F666FF /* CollectionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7C74E022C407B100F666FF /* CollectionSection.swift */; };
 		DDE3AA2222C88E0C000D0E59 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE3AA2122C88E0C000D0E59 /* Extensions.swift */; };
 		DDE3AA2422C947FA000D0E59 /* SizeableCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE3AA2322C947FA000D0E59 /* SizeableCollectionView.swift */; };
-		DDE3AA2622C96AD0000D0E59 /* CollectionGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDE3AA2522C96AD0000D0E59 /* CollectionGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,7 +36,6 @@
 		DD7C74E022C407B100F666FF /* CollectionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionSection.swift; sourceTree = "<group>"; };
 		DDE3AA2122C88E0C000D0E59 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		DDE3AA2322C947FA000D0E59 /* SizeableCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeableCollectionView.swift; sourceTree = "<group>"; };
-		DDE3AA2522C96AD0000D0E59 /* CollectionGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,7 +75,6 @@
 				DDE3AA2322C947FA000D0E59 /* SizeableCollectionView.swift */,
 				DD7C74DA22C17CDC00F666FF /* CollectionFunctionBuilders.swift */,
 				DD7C74E022C407B100F666FF /* CollectionSection.swift */,
-				DDE3AA2522C96AD0000D0E59 /* CollectionGroup.swift */,
 				DDE3AA2122C88E0C000D0E59 /* Extensions.swift */,
 				58132B9422BE05E600521741 /* TextCell.swift */,
 				58132B8422BE019700521741 /* Assets.xcassets */,
@@ -168,7 +165,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDE3AA2422C947FA000D0E59 /* SizeableCollectionView.swift in Sources */,
-				DDE3AA2622C96AD0000D0E59 /* CollectionGroup.swift in Sources */,
 				58132B9522BE05E600521741 /* TextCell.swift in Sources */,
 				58132B7F22BE019600521741 /* AppDelegate.swift in Sources */,
 				58132B8122BE019600521741 /* SceneDelegate.swift in Sources */,

@@ -10,14 +10,11 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
     fileprivate(set) var data: [Content]
 
     // MARK: Mutable
-    fileprivate var insets: UIEdgeInsets?
+    fileprivate(set) var sectionLayout: NSCollectionLayoutSection = CollectionSection.defaultListLayout()
+    fileprivate(set) var insets: UIEdgeInsets?
 
     var views: CollectionSectionViews<Parent, Footer, Content> {
       return CollectionSectionViews(section: self)
-    }
-
-    var layout: CollectionSectionLayout<Parent, Footer, Content> {
-      return CollectionSectionLayout(section: self)
     }
 
     var body: some View {
@@ -36,18 +33,21 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
   init(header: Parent,
        footer: Footer,
        data: [Content],
-       insets: UIEdgeInsets?) {
+       insets: UIEdgeInsets?,
+       sectionLayout: NSCollectionLayoutSection) {
     self.header = header
     self.footer = footer
     self.data = data
     self.insets = insets
+    self.sectionLayout = sectionLayout
   }
 
   fileprivate func modify(header: Parent? = nil,
                           footer: Footer? = nil,
                           data: [Content]? = nil,
-                          insets: UIEdgeInsets? = nil) -> Self {
-    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data, insets: insets ?? self.insets)
+                          insets: UIEdgeInsets? = nil,
+                          sectionLayout: NSCollectionLayoutSection? = nil) -> Self {
+    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data, insets: insets ?? self.insets, sectionLayout: sectionLayout ?? self.sectionLayout)
   }
 
   init(header: Parent, footer: Footer, @CollectionSectionBuilder content: () -> [Content]) {
@@ -156,21 +156,38 @@ extension CollectionSection {
 }
 
 // MARK: - Layout
-struct CollectionSectionLayout<Parent, Footer, Content> where Parent : View, Footer : View, Content : View {
-  let parentSize: CGSize
-  let contentSizes: [CGSize]
-  let footerSize: CGSize
+extension CollectionSection {
+  func sectionLayout(with group: NSCollectionLayoutGroup) -> Self {
+    return self.modify(sectionLayout: NSCollectionLayoutSection(group: group))
+  }
 
-  let inset: UIEdgeInsets?
+  func verticalSectionLayout(width: NSCollectionLayoutDimension = .fractionalWidth(1.0), height: NSCollectionLayoutDimension, with subitems: [NSCollectionLayoutItem]) -> Self {
+    return
+      self.sectionLayout(with: NSCollectionLayoutGroup.vertical(
+                               layoutSize: NSCollectionLayoutSize(widthDimension: width, heightDimension: height),
+                               subitems: subitems))
+  }
 
-  init(section: CollectionSection<Parent, Footer, Content>) {
-    let views = section.views
+  func horizontalSectionLayout(width: NSCollectionLayoutDimension, height: NSCollectionLayoutDimension = .fractionalWidth(1.0), with subitems: [NSCollectionLayoutItem]) -> Self {
+    return
+      self.sectionLayout(with: NSCollectionLayoutGroup.horizontal(
+        layoutSize: NSCollectionLayoutSize(widthDimension: width, heightDimension: height),
+        subitems: subitems))
+  }
+}
 
-    self.parentSize = views.parent.sizeThatFits(in: UIScreen.main.bounds.size)
-    self.contentSizes = views.content.map({ $0.sizeThatFits(in: UIScreen.main.bounds.size) })
-    self.footerSize = views.footer.sizeThatFits(in: UIScreen.main.bounds.size)
+fileprivate extension CollectionSection {
+  static func defaultListLayout() -> NSCollectionLayoutSection {
+    let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                          heightDimension: .fractionalHeight(1.0))
+    let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-    self.inset = section.insets
+    let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                           heightDimension: .fractionalWidth(0.2))
+    let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                   subitems: [item])
+
+    return NSCollectionLayoutSection(group: group)
   }
 }
 
