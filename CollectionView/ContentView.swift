@@ -14,26 +14,11 @@ struct Restaurant: Identifiable {
 }
 
 struct ContentView : View {
-    let favoriteRestaurants = [
-      Restaurant(name: "Joe's Original"),
-      Restaurant(name: "The Real Joe's Original"),
-      Restaurant(name: "Original Joe's")
-    ]
-
-    let hatedRestaurants = [
-      Restaurant(name: "Bob's Original"),
-      Restaurant(name: "The Real Bob's Original"),
-      Restaurant(name: "Original Bob's")
-    ]
-
     var body: some View {
-      Collection((header: Text("Favorite"), favoriteRestaurants),
-                 (header: Text("Hated"), hatedRestaurants)) {
-                  Text($0.name)
+      Collection((header: Text("Favorite"), Array(0...94)),
+                 (header: Text("Hated"), Array(0...92))) {
+                  Text("\($0)")
         }
-          .insets(5)
-          .spacing()
-          .rowSpacing(20)
     }
 }
 

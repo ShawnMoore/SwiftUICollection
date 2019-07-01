@@ -10,7 +10,7 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
     fileprivate(set) var data: [Content]
 
     // MARK: Mutable
-    fileprivate(set) var sectionLayout: NSCollectionLayoutSection = CollectionSection.defaultListLayout()
+    fileprivate(set) var sectionLayout = NSCollectionLayoutSection.Layouts.squareGrid(3).rawValue
     fileprivate(set) var insets: UIEdgeInsets?
 
     var views: CollectionSectionViews<Parent, Footer, Content> {
@@ -173,21 +173,6 @@ extension CollectionSection {
       self.sectionLayout(with: NSCollectionLayoutGroup.horizontal(
         layoutSize: NSCollectionLayoutSize(widthDimension: width, heightDimension: height),
         subitems: subitems))
-  }
-}
-
-fileprivate extension CollectionSection {
-  static func defaultListLayout() -> NSCollectionLayoutSection {
-    let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                          heightDimension: .fractionalHeight(1.0))
-    let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
-    let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                           heightDimension: .fractionalWidth(0.2))
-    let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                   subitems: [item])
-
-    return NSCollectionLayoutSection(group: group)
   }
 }
 
