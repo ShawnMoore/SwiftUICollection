@@ -8,17 +8,11 @@
 
 import SwiftUI
 
-struct Restaurant: Identifiable {
-  var id = UUID()
-  var name: String
-}
-
 struct ContentView : View {
     var body: some View {
-      Collection((header: Text("Favorite"), Array(0...94)),
-                 (header: Text("Hated"), Array(0...92))) {
-                  Text("\($0)")
-        }
+      Collection(Array(0...93)) {
+        Text("\($0)")
+      }.layout(group: NSCollectionLayoutGroup.Layouts.news(93).rawValue)
     }
 }
 
