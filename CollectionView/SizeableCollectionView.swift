@@ -24,6 +24,11 @@ class SizeableCollectionView: UICollectionView {
   }
 
   override func layoutSubviews() {
+    // NOTE: super.layoutSubviews hits an infinite loop when bounds is zero
+    guard self.bounds != .zero else {
+      return
+    }
+
     super.layoutSubviews()
 
     if self.bounds != oldBounds {
