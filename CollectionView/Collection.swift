@@ -38,6 +38,8 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
     func makeUIView(context: Context) -> UICollectionView {
         let view = SizeableCollectionView(frame: .zero, collectionViewLayout: makeLayout())
         view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        view.register(UICollectionViewCell.self, forSupplementaryViewOfKind: "section-header-element-kind", withReuseIdentifier: "supplementary")
+        view.register(UICollectionViewCell.self, forSupplementaryViewOfKind: "section-footer-element-kind", withReuseIdentifier: "supplementary")
 
         let dataSource = UICollectionViewDiffableDataSource<Int, UIHostingController<Content>>(collectionView: view) {
           (collectionView: UICollectionView,
@@ -46,6 +48,16 @@ struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : 
 
           // Return the cell.
           return collectionView.dequeueReusableCell(withReuseIdentifier: "cell",for: indexPath).embed(hostingController.view)
+        }
+
+        dataSource.supplementaryViewProvider = { (
+          collectionView: UICollectionView,
+          kind: String,
+          indexPath: IndexPath) -> UICollectionReusableView? in
+
+          let supplementaryView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "supplementary", for: indexPath)
+          let sectionView = self.views[indexPath.section].views
+          return supplementaryView.embed( kind == "section-header-element-kind" ? sectionView.parent.view : sectionView.footer.view)
         }
 
         // initial data
@@ -97,18 +109,50 @@ fileprivate extension Collection {
 }
 
 extension Collection {
-  func layout(group: NSCollectionLayoutGroup, for section: Int? = nil) -> Self {
-    if let section = section {
+  func layout(group: NSCollectionLayoutGroup, for sectionIndex: Int? = nil) -> Self {
+    if let sectionIndex = sectionIndex {
       var views = self.views
 
-      if let view = views.element(at: section) {
-        views[section] = view.sectionLayout(with: group)
+      if let view = views.element(at: sectionIndex) {
+        views[sectionIndex] = view.sectionLayout(with: group)
       }
 
       return self.modify(views: views)
     } else {
       return self.modify(views: self.views.map { (section) -> CollectionSection<Parent, Footer, Content> in
         section.sectionLayout(with: group)
+      })
+    }
+  }
+
+  func header(width: NSCollectionLayoutDimension, height: NSCollectionLayoutDimension, pinned: Bool = false, for sectionIndex: Int? = nil) -> Self {
+    if let sectionIndex = sectionIndex {
+      var views = self.views
+
+      if let view = views.element(at: sectionIndex) {
+        views[sectionIndex] = view.sectionHeader(width: width, height: height, pinned: pinned)
+      }
+
+      return self.modify(views: views)
+    } else {
+      return self.modify(views: self.views.map { (section) -> CollectionSection<Parent, Footer, Content> in
+        section.sectionHeader(width: width, height: height, pinned: pinned)
+      })
+    }
+  }
+
+  func footer(width: NSCollectionLayoutDimension, height: NSCollectionLayoutDimension, for sectionIndex: Int? = nil) -> Self {
+    if let sectionIndex = sectionIndex {
+      var views = self.views
+
+      if let view = views.element(at: sectionIndex) {
+        views[sectionIndex] = view.sectionFooter(width: width, height: height)
+      }
+
+      return self.modify(views: views)
+    } else {
+      return self.modify(views: self.views.map { (section) -> CollectionSection<Parent, Footer, Content> in
+        section.sectionFooter(width: width, height: height)
       })
     }
   }

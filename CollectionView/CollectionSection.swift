@@ -11,6 +11,8 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
 
     // MARK: Mutable
     fileprivate(set) var sectionLayout = NSCollectionLayoutSection.Layouts.squareGrid(3).rawValue
+    fileprivate(set) var sectionHeader: NSCollectionLayoutBoundarySupplementaryItem?
+    fileprivate(set) var sectionFooter: NSCollectionLayoutBoundarySupplementaryItem?
     fileprivate(set) var insets: UIEdgeInsets?
 
     var views: CollectionSectionViews<Parent, Footer, Content> {
@@ -34,20 +36,28 @@ struct CollectionSection<Parent, Footer, Content> : DynamicViewContent where Par
        footer: Footer,
        data: [Content],
        insets: UIEdgeInsets?,
-       sectionLayout: NSCollectionLayoutSection) {
+       sectionLayout: NSCollectionLayoutSection,
+       sectionHeader: NSCollectionLayoutBoundarySupplementaryItem?,
+       sectionFooter: NSCollectionLayoutBoundarySupplementaryItem?) {
     self.header = header
     self.footer = footer
     self.data = data
     self.insets = insets
     self.sectionLayout = sectionLayout
+    self.sectionHeader = sectionHeader
+    self.sectionFooter = sectionFooter
+
+    self.sectionLayout.boundarySupplementaryItems = [sectionHeader, sectionFooter].compactMap({ $0 })
   }
 
   fileprivate func modify(header: Parent? = nil,
                           footer: Footer? = nil,
                           data: [Content]? = nil,
                           insets: UIEdgeInsets? = nil,
-                          sectionLayout: NSCollectionLayoutSection? = nil) -> Self {
-    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data, insets: insets ?? self.insets, sectionLayout: sectionLayout ?? self.sectionLayout)
+                          sectionLayout: NSCollectionLayoutSection? = nil,
+                          sectionHeader: NSCollectionLayoutBoundarySupplementaryItem? = nil,
+                          sectionFooter: NSCollectionLayoutBoundarySupplementaryItem? = nil) -> Self {
+    return Self.init(header: header ?? self.header, footer: footer ?? self.footer, data: data ?? self.data, insets: insets ?? self.insets, sectionLayout: sectionLayout ?? self.sectionLayout, sectionHeader: sectionHeader ?? self.sectionHeader, sectionFooter: sectionFooter ?? self.sectionFooter)
   }
 
   init(header: Parent, footer: Footer, @CollectionSectionBuilder content: () -> [Content]) {
@@ -174,6 +184,24 @@ extension CollectionSection {
         layoutSize: NSCollectionLayoutSize(widthDimension: width, heightDimension: height),
         subitems: subitems))
   }
+
+  func sectionHeader(width: NSCollectionLayoutDimension, height: NSCollectionLayoutDimension, pinned: Bool = false) -> Self {
+    let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: NSCollectionLayoutSize(widthDimension: width, heightDimension: height), elementKind: "section-header-element-kind", alignment: .top)
+
+    if pinned {
+      header.pinToVisibleBounds = true
+      header.zIndex = 2
+    }
+
+    return self.modify(sectionHeader: header)
+  }
+
+  func sectionFooter(width: NSCollectionLayoutDimension, height: NSCollectionLayoutDimension) -> Self {
+    let footer = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: NSCollectionLayoutSize(widthDimension: width, heightDimension: height), elementKind: "section-footer-element-kind", alignment: .bottom)
+
+    return self.modify(sectionFooter: footer)
+  }
+
 }
 
 //#if DEBUG

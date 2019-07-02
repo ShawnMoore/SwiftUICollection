@@ -12,8 +12,8 @@ internal extension Array {
   }
 }
 
-internal extension UICollectionViewCell {
-  func embed(_ view: UIView) -> UICollectionViewCell {
+internal extension UIView {
+  func embed(_ view: UIView) -> Self {
     view.translatesAutoresizingMaskIntoConstraints = false
     view.frame = self.frame
     self.addSubview(view)

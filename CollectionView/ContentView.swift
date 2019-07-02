@@ -10,9 +10,11 @@ import SwiftUI
 
 struct ContentView : View {
     var body: some View {
-      Collection(Array(0...93)) {
+      Collection((header: Text("Numbers"), Array(0...93))) {
         Text("\($0)")
-      }.layout(group: NSCollectionLayoutGroup.Layouts.news(93).rawValue)
+      }
+        .layout(group: NSCollectionLayoutGroup.Layouts.news(93).rawValue)
+        .header(width: .fractionalWidth(1.0), height: .absolute(44.0))
     }
 }
 
