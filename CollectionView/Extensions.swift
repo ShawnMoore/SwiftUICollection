@@ -27,17 +27,18 @@ internal extension UICollectionViewCell {
   }
 }
 
-internal extension NSCollectionLayoutSection {
+internal extension NSCollectionLayoutGroup {
   enum Layouts: RawRepresentable {
-    init?(rawValue: NSCollectionLayoutSection) {
-      self = Layouts.customSection(rawValue)
-    }
-
     case list
     case squareGrid(_ amount: Int)
-    case customSection(_ value: NSCollectionLayoutSection)
+    case nested
+    case news(_ count: Int)
 
-    var rawValue: NSCollectionLayoutSection {
+    init?(rawValue: NSCollectionLayoutGroup) {
+      return nil
+    }
+
+    var rawValue: NSCollectionLayoutGroup {
       switch self {
       case .list:
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
@@ -46,10 +47,8 @@ internal extension NSCollectionLayoutSection {
 
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                heightDimension: .fractionalWidth(0.2))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       subitems: [item])
-
-        return NSCollectionLayoutSection(group: group)
+        return NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                  subitems: [item])
       case .squareGrid(let perRow):
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0/CGFloat(perRow)),
                                               heightDimension: .fractionalHeight(1.0))
@@ -57,10 +56,75 @@ internal extension NSCollectionLayoutSection {
 
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                heightDimension: .fractionalWidth(1.0/CGFloat(perRow)))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       subitems: [item])
+        return NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                  subitems: [item])
+      case .nested:
+        let leadingItem = NSCollectionLayoutItem(
+          layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.7),
+                                             heightDimension: .fractionalHeight(1.0)))
+        leadingItem.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
 
-        return NSCollectionLayoutSection(group: group)
+        let trailingItem = NSCollectionLayoutItem(
+          layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                             heightDimension: .fractionalHeight(0.3)))
+        trailingItem.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+        let trailingGroup = NSCollectionLayoutGroup.vertical(
+          layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.3),
+                                             heightDimension: .fractionalHeight(1.0)),
+          subitem: trailingItem, count: 2)
+
+        return NSCollectionLayoutGroup.horizontal(
+          layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                             heightDimension: .fractionalHeight(0.4)),
+          subitems: [leadingItem, trailingGroup])
+      case .news(let count):
+        let subGroups: [NSCollectionLayoutGroup] = {
+          var itemCount = count
+          var groups: [NSCollectionLayoutGroup] = []
+
+          while itemCount > 0 {
+            let rowCount = Int.random(in: 1..<3)
+
+            if itemCount == 1 || rowCount == 1 {
+              itemCount -= 1
+              groups.append(Layouts.list.rawValue)
+            } else /*if rowCount == 2*/ {
+              itemCount -= 2
+              groups.append(Layouts.squareGrid(2).rawValue)
+            }
+          }
+
+          return groups
+        }()
+
+        return NSCollectionLayoutGroup.vertical(
+          layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                             heightDimension: .estimated(UIScreen.main.bounds.size.height)),
+          subitems: subGroups)
+      }
+    }
+  }
+}
+
+internal extension NSCollectionLayoutSection {
+  enum Layouts: RawRepresentable {
+    init?(rawValue: NSCollectionLayoutSection) {
+      self = Layouts.customSection(rawValue)
+    }
+
+    case list
+    case squareGrid(_ amount: Int)
+    case nested
+    case customSection(_ value: NSCollectionLayoutSection)
+
+    var rawValue: NSCollectionLayoutSection {
+      switch self {
+      case .list:
+        return NSCollectionLayoutSection(group: NSCollectionLayoutGroup.Layouts.list.rawValue)
+      case .squareGrid(let perRow):
+        return NSCollectionLayoutSection(group: NSCollectionLayoutGroup.Layouts.squareGrid(perRow).rawValue)
+      case .nested:
+        return NSCollectionLayoutSection(group: NSCollectionLayoutGroup.Layouts.nested.rawValue)
       case .customSection(let value):
         return value
       }

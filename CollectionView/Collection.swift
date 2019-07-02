@@ -10,25 +10,13 @@ import SwiftUI
 
 struct Collection<Parent, Footer, Content> : UIViewRepresentable where Parent : View, Footer : View, Content : View {
     fileprivate var views: [CollectionSection<Parent, Footer, Content>]
-    fileprivate var insets: UIEdgeInsets?
-    fileprivate var spacing: Length?
-    fileprivate var rowSpacing: Length?
 
-    fileprivate init(views: [CollectionSection<Parent, Footer, Content>] = [],
-                     insets: UIEdgeInsets? = nil,
-                     spacing: Length? = nil,
-                     rowSpacing: Length? = nil) {
+    fileprivate init(views: [CollectionSection<Parent, Footer, Content>] = []) {
       self.views = views
-      self.insets = insets
-      self.spacing = spacing
-      self.rowSpacing = rowSpacing
     }
 
-    fileprivate func modify(views: [CollectionSection<Parent, Footer, Content>]? = nil,
-                            insets: UIEdgeInsets? = nil,
-                            spacing: Length? = nil,
-                            rowSpacing: Length? = nil) -> Self {
-      return Self.init(views: views ?? self.views, insets: insets ?? self.insets, spacing: spacing ?? self.spacing, rowSpacing: rowSpacing ?? self.rowSpacing)
+    fileprivate func modify(views: [CollectionSection<Parent, Footer, Content>]?) -> Self {
+      return Self.init(views: views ?? self.views)
     }
 
     init() {
@@ -108,45 +96,21 @@ fileprivate extension Collection {
     }
 }
 
-// MARK: - insets
 extension Collection {
-  func insets(_ length: Length) -> Collection<Parent, Footer, Content> {
-    return self.modify(insets: UIEdgeInsets(top: length, left: length, bottom: length, right: length))
-  }
+  func layout(group: NSCollectionLayoutGroup, for section: Int? = nil) -> Self {
+    if let section = section {
+      var views = self.views
 
-  func insets(_ edges: Edge.Set = .all, _ length: Length? = nil) -> Collection<Parent, Footer, Content> {
-    let systeminsets: Length = 4
-    let insetsValue = length ?? systeminsets
-    var insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+      if let view = views.element(at: section) {
+        views[section] = view.sectionLayout(with: group)
+      }
 
-    if edges == .top || edges == .all || edges == .vertical {
-      insets.top = insetsValue
+      return self.modify(views: views)
+    } else {
+      return self.modify(views: self.views.map { (section) -> CollectionSection<Parent, Footer, Content> in
+        section.sectionLayout(with: group)
+      })
     }
-
-    if edges == .bottom || edges == .all || edges == .vertical {
-      insets.bottom = insetsValue
-    }
-
-    if edges == .leading || edges == .all || edges == .horizontal {
-      insets.left = insetsValue
-    }
-
-    if edges == .trailing || edges == .all || edges == .horizontal {
-      insets.right = insetsValue
-    }
-
-    return self.modify(insets: insets)
-  }
-}
-
-// MARK: - Spacing
-extension Collection {
-  func spacing(_ length: Length? = nil) -> Collection<Parent, Footer, Content> {
-    return self.modify(spacing: length ?? 4)
-  }
-
-  func rowSpacing(_ length: Length? = nil) -> Collection<Parent, Footer, Content> {
-    return self.modify(rowSpacing: length ?? 4)
   }
 }
 
